@@ -1,0 +1,70 @@
+<resources>
+    <string name="app_name">Budget Manager</string>
+
+    <!-- HomeScreen & AllTransactionsScreen -->
+    <string name="add_transaction">Ajouter une transaction</string>
+    <string name="recent_transactions">Dernières opérations</string>
+    <string name="all_transactions">Toutes les opérations</string>
+    <string name="show_more">Afficher plus</string>
+    <string name="no_transactions">Aucune opération enregistrée</string>
+    <string name="no_data_chart">Aucune donnée</string>
+    <string name="remaining_balance">Solde restant</string>
+    <string name="income_plural">Revenus</string>
+    <string name="expenses_plural">Dépenses</string>
+    <string name="monthly_badge">Mensuel</string>
+    <string name="stopped_badge">Terminé</string>
+    <string name="filter_month">Ce mois</string>
+    <string name="filter_year">Cette année</string>
+    <string name="filter_custom">Période</string>
+    <string name="date_from_prefix">Du %1$s</string>
+    <string name="date_to_prefix">Au %1$s</string>
+    <string name="ok">Valider</string>
+    <string name="today">Aujourd\'hui</string>
+    <string name="yesterday">Hier</string>
+
+    <!-- AddTransactionScreen & EditTransactionScreen -->
+    <string name="new_transaction">Nouvelle opération</string>
+    <string name="edit_transaction">Modifier l\'opération</string>
+    <string name="back">Retour</string>
+    <string name="expense_singular">Dépense</string>
+    <string name="income_singular">Revenu</string>
+    <string name="amount_label">Montant</string>
+    <string name="title_hint_expense">Intitulé (ex: Loyer, Courses…)</string>
+    <string name="title_hint_income">Intitulé (ex: Salaire, Prime…)</string>
+    <string name="category_label">Catégorie</string>
+    <string name="monthly_operation">Opération mensuelle</string>
+    <string name="repeats_every_month">Se répète chaque mois</string>
+    <string name="day_of_month_label">Jour du prélèvement (1 à 31)</string>
+    <string name="next_date_prefix">Prochain : %1$s</string>
+    <string name="stopped_on_prefix">Arrêté le %1$s</string>
+    <string name="save_transaction">Enregistrer l\'opération</string>
+    <string name="save_changes">Enregistrer les modifications</string>
+
+    <!-- Arrêt récurrence & Suppression -->
+    <string name="stop_monthly_title">Arrêter cette opération mensuelle</string>
+    <string name="stop_monthly_subtitle">Conserve l\'historique passé mais stoppe les prochains mois</string>
+    <string name="stop_monthly_button">Stopper la récurrence</string>
+    <string name="resume_monthly_button">Réactiver la récurrence</string>
+    <string name="delete_transaction">Supprimer l\'opération</string>
+    <string name="delete_confirm_title">Supprimer cette opération ?</string>
+    <string name="delete_confirm_message">Cette action est définitive et retirera l\'opération de tous vos calculs.</string>
+    <string name="cancel">Annuler</string>
+    <string name="confirm_delete">Supprimer</string>
+
+    <!-- Catégories Dépenses -->
+    <string name="cat_needs">Besoins</string>
+    <string name="cat_wants">Plaisirs</string>
+    <string name="cat_savings">Épargne</string>
+
+    <!-- Catégories Revenus -->
+    <string name="cat_salary">Salaire</string>
+    <string name="cat_occasional_income">Revenu occasionnel</string>
+
+    <!-- SettingsScreen -->
+    <string name="settings">Paramètres</string>
+    <string name="appearance_title">Apparence</string>
+    <string name="appearance_subtitle">Choisissez le thème de l\'application</string>
+    <string name="theme_system">Automatique (Système)</string>
+    <string name="theme_light">Mode clair</string>
+    <string name="theme_dark">Mode sombre</string>
+</resources>
