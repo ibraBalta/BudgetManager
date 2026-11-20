@@ -9,8 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,6 +51,7 @@ private enum class StatsFilterMode {
     MONTH, YEAR, CUSTOM
 }
 
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTransactionsScreen(
@@ -58,8 +59,9 @@ fun AllTransactionsScreen(
     isDarkTheme: Boolean,
     selectedPeriod: BudgetPeriod,
     onPeriodSelected: (BudgetPeriod) -> Unit,
-    onBackClick: () -> Unit,
-    onTransactionClick: (Transaction) -> Unit
+    onTransactionClick: (Transaction) -> Unit,
+    onSettingsClick: () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val aujourdhui = LocalDate.now()
     val moisActuel = YearMonth.from(aujourdhui)
@@ -70,7 +72,6 @@ fun AllTransactionsScreen(
         )
     }
 
-    // Dates personnalisées (par défaut : du 1er du mois jusqu'à aujourd'hui)
     var customStartEpochDay by rememberSaveable { mutableLongStateOf(aujourdhui.withDayOfMonth(1).toEpochDay()) }
     var customEndEpochDay by rememberSaveable { mutableLongStateOf(aujourdhui.toEpochDay()) }
 
@@ -80,14 +81,12 @@ fun AllTransactionsScreen(
     var showStartPicker by remember { mutableStateOf(false) }
     var showEndPicker by remember { mutableStateOf(false) }
 
-    // Définition des bornes exactes [dateDebut..dateFin] selon le mode choisi
     val (dateDebut, dateFin) = when (filterMode) {
         StatsFilterMode.MONTH -> aujourdhui.withDayOfMonth(1) to aujourdhui.withDayOfMonth(aujourdhui.lengthOfMonth())
         StatsFilterMode.YEAR -> LocalDate.of(aujourdhui.year, 1, 1) to aujourdhui
         StatsFilterMode.CUSTOM -> customStartDate to customEndDate
     }
 
-    // Dialogues de sélection de dates
     if (showStartPicker) {
         val pickerState = rememberDatePickerState(
             initialSelectedDateMillis = customStartDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -152,7 +151,6 @@ fun AllTransactionsScreen(
         }
     }
 
-    // 1. Filtrer les transactions sur l'intervalle [dateDebut..dateFin]
     val ymDebut = YearMonth.from(dateDebut)
     val ymFin = YearMonth.from(dateFin)
 
@@ -166,7 +164,6 @@ fun AllTransactionsScreen(
         }
     }
 
-    // 2. Montant effectif sur l'intervalle choisi
     fun montantPourPeriode(tx: Transaction): Double {
         if (!tx.isMensuel || filterMode == StatsFilterMode.MONTH) {
             return tx.montant
@@ -181,7 +178,6 @@ fun AllTransactionsScreen(
         return tx.montant * nbMois
     }
 
-    // 3. Date de tri cohérente avec la période sélectionnée
     fun dateDeTri(tx: Transaction): LocalDate {
         return if (tx.isMensuel && tx.jourDuMois != null) {
             val moisRef = minOf(ymFin, moisActuel)
@@ -196,17 +192,16 @@ fun AllTransactionsScreen(
         }
     }
 
-    // 4. Préparation des 2 camemberts
     val expensePalette = listOf(
-        Color(0xFFE57373), // Corail doux
-        Color(0xFFFFB74D), // Ambre doux
-        Color(0xFF64B5F6), // Bleu pastel
-        Color(0xFFBA68C8)  // Lavande
+        Color(0xFFE57373),
+        Color(0xFFFFB74D),
+        Color(0xFF64B5F6),
+        Color(0xFFBA68C8)
     )
     val incomePalette = listOf(
-        Color(0xFF81C784), // Vert sauge
-        Color(0xFF4DB6AC), // Turquoise doux
-        Color(0xFFA1887F)  // Taupe doux
+        Color(0xFF81C784),
+        Color(0xFF4DB6AC),
+        Color(0xFFA1887F)
     )
 
     val depensesParCategorie = transactionsFiltrees
@@ -237,7 +232,11 @@ fun AllTransactionsScreen(
             )
         }
 
-    // 5. Tri décroissant par date et regroupement par jour
+    // Calcul du solde restant sur la période affichée
+    val totalRevenus = revenusParCategorie.sumOf { it.amount }
+    val totalDepenses = depensesParCategorie.sumOf { it.amount }
+    val soldeRestant = totalRevenus - totalDepenses
+
     val transactionsTrieesParDate = transactionsFiltrees
         .sortedWith(compareByDescending<Transaction> { dateDeTri(it) }.thenByDescending { it.id })
         .groupBy { dateDeTri(it) }
@@ -254,11 +253,11 @@ fun AllTransactionsScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                actions = {
+                    IconButton(onClick = onSettingsClick) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings)
                         )
                     }
                 },
@@ -266,7 +265,8 @@ fun AllTransactionsScreen(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
-        }
+        },
+        bottomBar = bottomBar
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -347,7 +347,6 @@ fun AllTransactionsScreen(
                 }
             }
 
-            // Sélecteurs de dates personnalisées (visibles uniquement en mode "Période")
             if (filterMode == StatsFilterMode.CUSTOM) {
                 Row(
                     modifier = Modifier
@@ -416,9 +415,9 @@ fun AllTransactionsScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 32.dp)
+                contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                // SECTION STATISTIQUES : 2 CAMEMBERTS CÔTE À CÔTE
+                // 2 Camemberts côte à côte
                 item {
                     Row(
                         modifier = Modifier
@@ -445,11 +444,44 @@ fun AllTransactionsScreen(
                     }
                 }
 
+                // Carte Solde restant sous les camemberts
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.remaining_balance),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = String.format(
+                                    if (soldeRestant > 0) "+ %.2f" else "%.2f",
+                                    soldeRestant
+                                ),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = if (soldeRestant >= 0) incomeColor else expenseColor
+                            )
+                        }
+                    }
                 }
 
-                // LISTE DES OPÉRATIONS REGROUPÉES ET TRIÉES PAR DATE
+                item {
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
                 if (transactionsTrieesParDate.isEmpty()) {
                     item {
                         Box(

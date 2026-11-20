@@ -1,14 +1,17 @@
 <resources>
     <string name="app_name">Budget Manager</string>
 
-    <!-- HomeScreen & AllTransactionsScreen -->
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_stats">Statistiques</string>
+
+    <!-- HomeScreen & StatsScreen -->
     <string name="add_transaction">Ajouter une transaction</string>
     <string name="recent_transactions">Dernières opérations</string>
-    <string name="all_transactions">Toutes les opérations</string>
-    <string name="show_more">Afficher plus</string>
+    <string name="all_transactions">Statistiques</string>
     <string name="no_transactions">Aucune opération enregistrée</string>
     <string name="no_data_chart">Aucune donnée</string>
-    <string name="remaining_balance">Solde restant</string>
+    <string name="remaining_balance">Solde</string>
     <string name="income_plural">Revenus</string>
     <string name="expenses_plural">Dépenses</string>
     <string name="monthly_badge">Mensuel</string>

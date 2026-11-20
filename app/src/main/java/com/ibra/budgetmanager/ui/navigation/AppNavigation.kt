@@ -2,12 +2,22 @@ package com.ibra.budgetmanager.ui.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.PieChart
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ibra.budgetmanager.R
 import com.ibra.budgetmanager.ui.AppThemeMode
 import com.ibra.budgetmanager.ui.BudgetViewModel
 import com.ibra.budgetmanager.ui.screens.add.AddTransactionScreen
@@ -33,6 +43,13 @@ fun AppNavigation(
         var previousScreen by rememberSaveable { mutableStateOf("home") }
         var editingTransactionId by rememberSaveable { mutableStateOf<Long?>(null) }
 
+        val bottomBarContent: @Composable () -> Unit = {
+            BudgetBottomBar(
+                currentScreen = currentScreen,
+                onSelectScreen = { target -> currentScreen = target }
+            )
+        }
+
         when (currentScreen) {
             "home" -> {
                 HomeScreen(
@@ -42,17 +59,23 @@ fun AppNavigation(
                     onPeriodSelected = { newPeriod ->
                         viewModel.updatePeriod(newPeriod)
                     },
-                    onAddTransactionClick = { currentScreen = "add" },
+                    onAddTransactionClick = {
+                        previousScreen = "home"
+                        currentScreen = "add"
+                    },
                     onTransactionClick = { transaction ->
                         editingTransactionId = transaction.id
                         previousScreen = "home"
                         currentScreen = "edit"
                     },
-                    onShowMoreClick = { currentScreen = "all_transactions" },
-                    onSettingsClick = { currentScreen = "settings" }
+                    onSettingsClick = {
+                        previousScreen = "home"
+                        currentScreen = "settings"
+                    },
+                    bottomBar = bottomBarContent
                 )
             }
-            "all_transactions" -> {
+            "stats" -> {
                 BackHandler {
                     currentScreen = "home"
                 }
@@ -64,25 +87,29 @@ fun AppNavigation(
                     onPeriodSelected = { newPeriod ->
                         viewModel.updatePeriod(newPeriod)
                     },
-                    onBackClick = { currentScreen = "home" },
                     onTransactionClick = { transaction ->
                         editingTransactionId = transaction.id
-                        previousScreen = "all_transactions"
+                        previousScreen = "stats"
                         currentScreen = "edit"
-                    }
+                    },
+                    onSettingsClick = {
+                        previousScreen = "stats"
+                        currentScreen = "settings"
+                    },
+                    bottomBar = bottomBarContent
                 )
             }
             "add" -> {
                 BackHandler {
-                    currentScreen = "home"
+                    currentScreen = previousScreen
                 }
 
                 AddTransactionScreen(
                     isDarkTheme = isDarkTheme,
-                    onBackClick = { currentScreen = "home" },
+                    onBackClick = { currentScreen = previousScreen },
                     onSaveTransaction = { nouvelleTransaction ->
                         viewModel.ajouterTransaction(nouvelleTransaction)
-                        currentScreen = "home"
+                        currentScreen = previousScreen
                     }
                 )
             }
@@ -118,7 +145,7 @@ fun AppNavigation(
             }
             "settings" -> {
                 BackHandler {
-                    currentScreen = "home"
+                    currentScreen = previousScreen
                 }
 
                 SettingsScreen(
@@ -126,9 +153,56 @@ fun AppNavigation(
                     onThemeSelected = { newMode ->
                         viewModel.updateThemeMode(newMode)
                     },
-                    onBackClick = { currentScreen = "home" }
+                    onBackClick = { currentScreen = previousScreen }
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun BudgetBottomBar(
+    currentScreen: String,
+    onSelectScreen: (String) -> Unit
+) {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp
+    ) {
+        val isHomeSelected = currentScreen == "home"
+        NavigationBarItem(
+            selected = isHomeSelected,
+            onClick = { onSelectScreen("home") },
+            icon = {
+                Icon(
+                    imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
+                    contentDescription = stringResource(R.string.nav_home)
+                )
+            },
+            label = {
+                Text(
+                    text = stringResource(R.string.nav_home),
+                    fontWeight = if (isHomeSelected) FontWeight.Bold else FontWeight.Normal
+                )
+            }
+        )
+
+        val isStatsSelected = currentScreen == "stats"
+        NavigationBarItem(
+            selected = isStatsSelected,
+            onClick = { onSelectScreen("stats") },
+            icon = {
+                Icon(
+                    imageVector = if (isStatsSelected) Icons.Filled.PieChart else Icons.Outlined.PieChart,
+                    contentDescription = stringResource(R.string.nav_stats)
+                )
+            },
+            label = {
+                Text(
+                    text = stringResource(R.string.nav_stats),
+                    fontWeight = if (isStatsSelected) FontWeight.Bold else FontWeight.Normal
+                )
+            }
+        )
     }
 }

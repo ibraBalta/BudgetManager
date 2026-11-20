@@ -38,8 +38,8 @@ fun HomeScreen(
     onPeriodSelected: (BudgetPeriod) -> Unit,
     onAddTransactionClick: () -> Unit = {},
     onTransactionClick: (Transaction) -> Unit = {},
-    onShowMoreClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {}
 ) {
     val aujourdhui = LocalDate.now()
     val moisActuel = YearMonth.from(aujourdhui)
@@ -125,6 +125,7 @@ fun HomeScreen(
                 )
             )
         },
+        bottomBar = bottomBar,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddTransactionClick,
@@ -207,27 +208,25 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                if (dernieresTransactions.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.no_transactions),
-                                color = MaterialTheme.colorScheme.outline,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                } else {
+            if (dernieresTransactions.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_transactions),
+                        color = MaterialTheme.colorScheme.outline,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
                     items(dernieresTransactions, key = { it.id }) { transaction ->
                         TransactionItem(
                             transaction = transaction,
@@ -235,26 +234,6 @@ fun HomeScreen(
                             incomeColor = incomeColor,
                             expenseColor = expenseColor,
                             onClick = { onTransactionClick(transaction) }
-                        )
-                    }
-                }
-
-                // Bouton "Afficher +" toujours visible
-                item {
-                    OutlinedButton(
-                        onClick = onShowMoreClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp),
-                        shape = CardDefaults.shape,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.show_more),
-                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -386,7 +365,7 @@ fun TransactionItem(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${transaction.categorie} •$dateAffichee",
+                    text = "${transaction.categorie} • $dateAffichee",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline
                 )
